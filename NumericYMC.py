@@ -1,4 +1,3 @@
-from tkinter import Variable
 import pandas as pd
 import numpy as np
 # import statsmodels.formula.api as smf
@@ -136,31 +135,29 @@ def NumericYMC(Variable, Target, NumberOfGroups):
     #Variable = data['Year']
     #Target = np.where(data['Year']>=data['Year'].mean(),1,0)
     #NumberOfGroups = 10
-def FactorYMC(Variable, Target):
-    for VariableToConvert in FactorVariables:
-    VariableToConvert="Not Sport"
-    Target
+def FactorYMC(VariableToConvert, TargetName, Data, FrequencyNumber = 100):
+
     # Creating variable to transform it to YMC ------------------------
-    Variable = DataModel.loc[:, ["ClaimNo_Descision","percenthandicape", "y_suspicious","time_duration_days",VariableToConvert]]
-    Variable.columns = ["ClaimNo_Descision","percenthandicape", "y_suspicious","time_duration_days", "VariableToConvert"]
-    Variable.loc[:, 'VariableToConvert'] = Variable['VariableToConvert'].astype(str)
-    Variable.loc[:, 'VariableToConvert'] = Variable['VariableToConvert'].fillna('NULL')        
+    Variable = Data.loc[:, [TargetName,VariableToConvert]].set_axis(['TargetName','VariableToConvert'], axis=1)
+    Variable.loc[:, 'VariableToConvert'] = Variable['VariableToConvert'].astype(str).fillna('NULL')  
+   
 
     # Group all the Not Frequent Factor to one factor group -----------
-    NotFrequentFactorGroup = pd.DataFrame(Variable.groupby('VariableToConvert')['percenthandicape'].apply(lambda x: 'Rare' if len(x) <= 15 else 'Frequent')).reset_index()
+    NotFrequentFactorGroup = pd.DataFrame(Variable.groupby('VariableToConvert')['TargetName'].apply(lambda x: 'Rare' if len(x) <= FrequencyNumber else 'Frequent')).reset_index()
     NotFrequentFactorGroup.columns = ["VariableName", "SmallGroupOrNot"]
     FrequentFactors = NotFrequentFactorGroup.loc[NotFrequentFactorGroup.SmallGroupOrNot == 'Frequent'].VariableName
     Variable.loc[:, 'VariableToConvert'] = np.where(Variable['VariableToConvert'].isin(FrequentFactors), Variable['VariableToConvert'], 'Not Frequent Factor')
 
     # Creating Dictionary
-    Dictionary_Variable_YMC = Variable.groupby('VariableToConvert')[["percenthandicape", "y_suspicious","time_duration_days"]].apply(np.mean).reset_index()
-    Dictionary_Variable_YMC.columns = ["Variable","YMC_PercentHandicape_Mean_Variable","YMC_Suspicious_Mean_Variable","time_duration_days"]
-    Dictionary_Variable_YMC = Dictionary_Variable_YMC.sort_values(by='YMC_PercentHandicape_Mean_Variable', ascending=False)
+    Dictionary_Variable_YMC = Variable.groupby('VariableToConvert')["TargetName"].apply(np.mean).reset_index()
+    Dictionary_Variable_YMC.columns = ["Variable",TargetName+'_YMC']
+    Dictionary_Variable_YMC = Dictionary_Variable_YMC.sort_values(by=TargetName+'_YMC', ascending=False)
 
-    Dictionary = pd.DataFrame(data = {"VariableToConvert": DataModel[VariableToConvert].unique()})
-    Dictionary['VariableToConvert'] = Dictionary['VariableToConvert'].astype(str)
-    Dictionary['VariableToConvert'] = Dictionary['VariableToConvert'].fillna('NULL') 
+    Dictionary = pd.DataFrame(data = {"VariableToConvert": Data[VariableToConvert].unique()})
+    Dictionary['VariableToConvert'] = Dictionary['VariableToConvert'].astype(str).fillna('NULL') 
     Dictionary['Variable'] = np.where(Dictionary['VariableToConvert'].isin(FrequentFactors), Dictionary['VariableToConvert'], 'Not Frequent Factor')
     Dictionary = Dictionary.join(Dictionary_Variable_YMC.set_index('Variable'), how='left', on='Variable')
     Dictionary = Dictionary.drop(columns = 'Variable')
     Dictionary.columns = Dictionary_Variable_YMC.columns
+
+    return Dictionary
