@@ -95,11 +95,6 @@ def MultipleNumericYMC(Variable, PercentHandicape, Suspicious, TimeDurationDays,
 
 
 ##  FourBasicNumericYMC -------------------------------------------------------
-# data = pd.read_csv('http://winterolympicsmedals.com/medals.csv')
-# VariableToConvert = 'Sport'; TargetName = 'Year';Data = data; FrequencyNumber = 100; Fun = np.median; Suffix='_Median_YMC' 
-# Variable = data['Year']
-# Target = np.where(data['Year']>=data['Year'].mean(),1,0)
-# NumberOfGroups = 10
 def FourBasicNumericYMC(Variable, Target, NumberOfGroups):
     # Create dictionary for Variable
     #Dictionary = Ranks_Dictionary(Variable + np.random.uniform(0, 0.00001, len(Variable)), ranks_num=NumberOfGroups)
@@ -132,13 +127,15 @@ def FourBasicNumericYMC(Variable, Target, NumberOfGroups):
     Dictionary.loc[:, 'NumberOfObserbation'] = Dictionary['NumberOfObserbation'].fillna(0)
 
     return Dictionary
-
-##  NumericYMC -------------------------------------------------------
+#Example
 # data = pd.read_csv('http://winterolympicsmedals.com/medals.csv')
 # VariableToConvert = 'Sport'; TargetName = 'Year';Data = data; FrequencyNumber = 100; Fun = np.median; Suffix='_Median_YMC' 
 # Variable = data['Year']
 # Target = np.where(data['Year']>=data['Year'].mean(),1,0)
 # NumberOfGroups = 10
+# print(FourBasicNumericYMC(Variable = data['Year'],Target = np.where(data['Year']>=data['Year'].mean(),1,0),NumberOfGroups = 10))
+
+##  NumericYMC -------------------------------------------------------
 def NumericYMC(Variable, Target, NumberOfGroups,Fun = np.mean,Name = "Mean"):
     # Create dictionary for Variable
     Dictionary = Ranks_Dictionary(RJitter(Variable,0.00001), ranks_num=NumberOfGroups)
@@ -155,12 +152,21 @@ def NumericYMC(Variable, Target, NumberOfGroups,Fun = np.mean,Name = "Mean"):
     # Aggregation Table
     Dictionary = pd.DataFrame()
     Dictionary['Rank'] = Variable['Rank'].unique()
-    Dictionary = Dictionary.merge(Variable.groupby('Rank')['Variable'].apply(Fun).reset_index().set_axis(['Rank', 'Mean'], axis=1), how='left', on=['Rank'])
+    Dictionary = Dictionary.merge(Variable.groupby('Rank')['Variable'].apply(Fun).reset_index().set_axis(['Rank', Name], axis=1), how='left', on=['Rank'])
 
+    #Fill NA with the Function outcomes on all the variable
     Dictionary.loc[:, Name] = Dictionary[Name].fillna(Fun(Variable['Variable'].dropna()))
 
     return Dictionary
-    
+
+## Example
+# data = pd.read_csv('http://winterolympicsmedals.com/medals.csv')
+# VariableToConvert = 'Sport'; TargetName = 'Year';Data = data; FrequencyNumber = 100; Fun = np.median; Suffix='_Median_YMC' 
+# Variable = data['Year']
+# Target = np.where(data['Year']>=data['Year'].mean(),1,0)
+# NumberOfGroups = 10
+# NumericYMC(Variable = data['Year'],Target = np.where(data['Year']>=data['Year'].mean(),1,0),NumberOfGroups = 10,Fun = np.median,Name = "Median")
+
 ##  Percentile -------------------------------------------------------
 def percentile(n):
     def percentile_(x):
