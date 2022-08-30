@@ -94,11 +94,13 @@ def MultipleNumericYMC(Variable, PercentHandicape, Suspicious, TimeDurationDays,
 
 
 
-##  Numeric YMC -------------------------------------------------------
-    #Variable = data['Year']
-    #Target = np.where(data['Year']>=data['Year'].mean(),1,0)
-    #NumberOfGroups = 10
-def NumericYMC(Variable, Target, NumberOfGroups):
+##  FourBasicNumericYMC -------------------------------------------------------
+# data = pd.read_csv('http://winterolympicsmedals.com/medals.csv')
+# VariableToConvert = 'Sport'; TargetName = 'Year';Data = data; FrequencyNumber = 100; Fun = np.median; Suffix='_Median_YMC' 
+# Variable = data['Year']
+# Target = np.where(data['Year']>=data['Year'].mean(),1,0)
+# NumberOfGroups = 10
+def FourBasicNumericYMC(Variable, Target, NumberOfGroups):
     # Create dictionary for Variable
     #Dictionary = Ranks_Dictionary(Variable + np.random.uniform(0, 0.00001, len(Variable)), ranks_num=NumberOfGroups)
     Dictionary = Ranks_Dictionary(RJitter(Variable,0.00001), ranks_num=NumberOfGroups)
@@ -131,11 +133,47 @@ def NumericYMC(Variable, Target, NumberOfGroups):
 
     return Dictionary
 
+##  NumericYMC -------------------------------------------------------
+# data = pd.read_csv('http://winterolympicsmedals.com/medals.csv')
+# VariableToConvert = 'Sport'; TargetName = 'Year';Data = data; FrequencyNumber = 100; Fun = np.median; Suffix='_Median_YMC' 
+# Variable = data['Year']
+# Target = np.where(data['Year']>=data['Year'].mean(),1,0)
+# NumberOfGroups = 10
+def NumericYMC(Variable, Target, NumberOfGroups,Fun = np.mean,Name = "Mean"):
+    # Create dictionary for Variable
+    Dictionary = Ranks_Dictionary(RJitter(Variable,0.00001), ranks_num=NumberOfGroups)
+    Dictionary.index = pd.IntervalIndex.from_arrays(Dictionary['lag_value'],
+                                                    Dictionary['value'],
+                                                    closed='left')
+    # Convert Each value in variable to rank
+    Variable = pd.DataFrame({'Variable': Variable, 
+                             'Target': Target})
+    IntervalLocation = Variable['Variable']
+    Variable['Rank'] = Dictionary.loc[IntervalLocation]['Rank'].reset_index(drop=True)
+    del IntervalLocation
+
+    # Aggregation Table
+    Dictionary = pd.DataFrame()
+    Dictionary['Rank'] = Variable['Rank'].unique()
+    Dictionary = Dictionary.merge(Variable.groupby('Rank')['Variable'].apply(Fun).reset_index().set_axis(['Rank', 'Mean'], axis=1), how='left', on=['Rank'])
+
+    Dictionary.loc[:, Name] = Dictionary[Name].fillna(Fun(Variable['Variable'].dropna()))
+
+    return Dictionary
+    
+##  Percentile -------------------------------------------------------
+def percentile(n):
+    def percentile_(x):
+        return np.percentile(x, n)
+    percentile_.__name__ = 'percentile_%s' % n
+    return percentile_
+
+#percentile(50)(np.array([1, 2, 3, 4, 5, 2, 3, 4, 5, 3, 4, 5, 4, 5, 5]))
+
 ##  Factor YMC -------------------------------------------------------
-    #Variable = data['Year']
-    #Target = np.where(data['Year']>=data['Year'].mean(),1,0)
-    #NumberOfGroups = 10
-def FactorYMC(VariableToConvert, TargetName, Data, FrequencyNumber = 100):
+#data = pd.read_csv('http://winterolympicsmedals.com/medals.csv')
+#VariableToConvert = 'Sport'; TargetName = 'Year';Data = data; FrequencyNumber = 100; Fun = np.median; Suffix='_Median_YMC' 
+def FactorYMC(VariableToConvert, TargetName, Data, FrequencyNumber = 100, Fun = np.mean, Suffix='_Mean_YMC'):
 
     # Creating variable to transform it to YMC ------------------------
     Variable = Data.loc[:, [TargetName,VariableToConvert]].set_axis(['TargetName','VariableToConvert'], axis=1)
@@ -149,9 +187,9 @@ def FactorYMC(VariableToConvert, TargetName, Data, FrequencyNumber = 100):
     Variable.loc[:, 'VariableToConvert'] = np.where(Variable['VariableToConvert'].isin(FrequentFactors), Variable['VariableToConvert'], 'Not Frequent Factor')
 
     # Creating Dictionary
-    Dictionary_Variable_YMC = Variable.groupby('VariableToConvert')["TargetName"].apply(np.mean).reset_index()
-    Dictionary_Variable_YMC.columns = ["Variable",TargetName+'_YMC']
-    Dictionary_Variable_YMC = Dictionary_Variable_YMC.sort_values(by=TargetName+'_YMC', ascending=False)
+    Dictionary_Variable_YMC = Variable.groupby('VariableToConvert')["TargetName"].apply(Fun).reset_index()
+    Dictionary_Variable_YMC.columns = ["Variable",TargetName+Suffix]
+    Dictionary_Variable_YMC = Dictionary_Variable_YMC.sort_values(by=TargetName+Suffix, ascending=False)
 
     Dictionary = pd.DataFrame(data = {"VariableToConvert": Data[VariableToConvert].unique()})
     Dictionary['VariableToConvert'] = Dictionary['VariableToConvert'].astype(str).fillna('NULL') 
@@ -161,3 +199,5 @@ def FactorYMC(VariableToConvert, TargetName, Data, FrequencyNumber = 100):
     Dictionary.columns = Dictionary_Variable_YMC.columns
 
     return Dictionary
+
+#FactorYMC(VariableToConvert = 'Sport', TargetName = 'Year',Data = data, FrequencyNumber = 100, Fun = np.median, Suffix='_Median_YMC' )
