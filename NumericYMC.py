@@ -138,7 +138,7 @@ def NumericYMC(Variable, Target, NumberOfGroups):
     #NumberOfGroups = 10
 def FactorYMC(Variable, Target):
     for VariableToConvert in FactorVariables:
-    VariableToConvert="Sport"
+    VariableToConvert="Not Sport"
     Target
     # Creating variable to transform it to YMC ------------------------
     Variable = DataModel.loc[:, ["ClaimNo_Descision","percenthandicape", "y_suspicious","time_duration_days",VariableToConvert]]
