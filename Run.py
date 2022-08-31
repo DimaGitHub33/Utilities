@@ -10,7 +10,7 @@ os.chdir("/Users/dhhazanov/Documents/GitHub/Utilities/")
 os.getcwd()
 
 # %% Import for Utilities Functions ----------------------------------------
-from NumericYMC import RJitter,Ranks_Dictionary,FourBasicNumericYMC,NumericYMC,FactorYMC,percentile
+from YMC import RJitter,Ranks_Dictionary,FourBasicNumericYMC,NumericYMC,FactorYMC,percentile
 
 # %% Rjitter ---------------------------------------------------------------
 print("RJitter:")
