@@ -1,31 +1,5 @@
-class YMC:
-    def __init__(self, Name):
-        print(f"YMC Instatnce Created For: {Name}")
-        self.name = Name
-    def Fun1(self, x, y):
-        return x*y
-
-
-ymc1 = YMC("YMC")
-ymc1.name = "Factor YMC"
-ymc1.Variables = 5
-ymc1.a = 2
-ymc1.b = 4
-ymc1.Fun1(ymc1.a,ymc1.b)
-print(ymc1)
-
-
-
-ymc2 = YMC()
-ymc2.name = "Factor YMC"
-ymc2.Variables = 5
-ymc2.a = 2
-ymc2.b = 4
-ymc2.Fun1(ymc2.a,ymc2.b)
-print(ymc2)
-
-
 ##  NumericYMC -------------------------------------------------------
+from types import ClassMethodDescriptorType
 import numpy as np
 import pandas as pd
 from YMC import RJitter, Ranks_Dictionary
@@ -33,6 +7,7 @@ class NumericYMC:
     #Class Attribute
     PurposeOfClass = "This class calculate the numeric ymc" 
     JitterRate = 0.00001
+    AllInstances = []
 
     def __init__(self,Variable: float, Target: float, NumberOfGroups = 10,Fun = np.mean,Name = "Mean"):
         # Run validation to the recieved arguments
@@ -44,6 +19,28 @@ class NumericYMC:
         self.NumberOfGroups = NumberOfGroups
         self.Fun = Fun
         self.Name = Name
+
+        # Action to execute
+        NumericYMC.AllInstances.append(self)
+
+    # Class method to initiate a class for examples
+    @classmethod
+    def InstantiateFromWeb(cls):
+        Data = pd.read_csv('http://winterolympicsmedals.com/medals.csv')
+        Variable = Data['Year']
+        Target = np.where(Data['Year']>=Data['Year'].median(),1,0)
+        return NumericYMC(Variable  = Variable,Target = Target,NumberOfGroups = 5,Fun = np.mean,Name = "Mean")
+
+    # Static method just for implement in the future 
+    @staticmethod
+    def is_integer(Num):
+        if isinstance(Num,float):
+            return Num.is_integer()
+        elif isinstance(Num,int):
+            return True
+        else:
+            return False
+
 
     def YMC(self):
         Variable = self.Variable
@@ -74,6 +71,10 @@ class NumericYMC:
 
         return Dictionary
 
+    ## Name of the instance (reprecent of the instance)
+    def __repr__(self):
+        return f"YMC {self.Name}"
+
 
 # Example 
 data = pd.read_csv('http://winterolympicsmedals.com/medals.csv')
@@ -82,10 +83,20 @@ Target = np.where(data['Year']>=data['Year'].mean(),1,0)
 NumberOfGroups = 10
 #NumericYMC(Variable = data['Year'],Target = np.where(data['Year']>=data['Year'].mean(),1,0),NumberOfGroups = 10,Fun = np.median,Name = "Median")
 
-YMC = NumericYMC(Variable  = Variable,Target = Target,NumberOfGroups = 10,Fun = np.mean,Name = "Mean")
-YMC.YMC()
-print(NumericYMC.PurposeOfClass)
-print(YMC.PurposeOfClass)
+YMC1 = NumericYMC(Variable  = Variable,Target = Target,NumberOfGroups = 10,Fun = np.mean,Name = "Mean")
+YMC2 = NumericYMC(Variable  = Variable,Target = Target,NumberOfGroups = 10,Fun = np.median,Name = "Median")
+YMC3 = NumericYMC.InstantiateFromWeb()
+
+YMC3.YMC()
+##All the Instances
+for Instances in NumericYMC.AllInstances:
+    print(Instances)
+
+print(NumericYMC.AllInstances)
+
+
+
 
 print(NumericYMC.__dict__)## All the atributes for class level
 print(YMC.__dict__)## All the atributes for instance level
+
