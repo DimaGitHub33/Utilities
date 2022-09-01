@@ -136,7 +136,7 @@ def FourBasicNumericYMC(Variable, Target, NumberOfGroups):
 # print(FourBasicNumericYMC(Variable = data['Year'],Target = np.where(data['Year']>=data['Year'].mean(),1,0),NumberOfGroups = 10))
 
 ##  NumericYMC -------------------------------------------------------
-def NumericYMC(Variable, Target, NumberOfGroups,Fun = np.mean,Name = "Mean"):
+def FunNumericYMC(Variable, Target, NumberOfGroups,Fun = np.mean,Name = "Mean"):
     # Create dictionary for Variable
     Dictionary = Ranks_Dictionary(RJitter(Variable,0.00001), ranks_num=NumberOfGroups)
     Dictionary.index = pd.IntervalIndex.from_arrays(Dictionary['lag_value'],
@@ -179,7 +179,7 @@ def percentile(n):
 ##  Factor YMC -------------------------------------------------------
 #data = pd.read_csv('http://winterolympicsmedals.com/medals.csv')
 #VariableToConvert = 'Sport'; TargetName = 'Year';Data = data; FrequencyNumber = 100; Fun = np.median; Suffix='_Median_YMC' 
-def FactorYMC(VariableToConvert, TargetName, Data, FrequencyNumber = 100, Fun = np.mean, Suffix='_Mean_YMC'):
+def FunFactorYMC(VariableToConvert, TargetName, Data, FrequencyNumber = 100, Fun = np.mean, Suffix='_Mean_YMC'):
 
     # Creating variable to transform it to YMC ------------------------
     Variable = Data.loc[:, [TargetName,VariableToConvert]].set_axis(['TargetName','VariableToConvert'], axis=1)
@@ -206,4 +206,4 @@ def FactorYMC(VariableToConvert, TargetName, Data, FrequencyNumber = 100, Fun = 
 
     return Dictionary
 
-#FactorYMC(VariableToConvert = 'Sport', TargetName = 'Year',Data = data, FrequencyNumber = 100, Fun = np.median, Suffix='_Median_YMC' )
+#FunFactorYMC(VariableToConvert = 'Sport', TargetName = 'Year',Data = data, FrequencyNumber = 100, Fun = np.median, Suffix='_Median_YMC' )
