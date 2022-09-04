@@ -1,7 +1,6 @@
 ##  NumericYMC -------------------------------------------------------
 import numpy as np
 import pandas as pd
-from YMCFunctions import RJitter, Ranks_Dictionary
 class NumericYMC:
     #Class Attribute
     PurposeOfClass = "This class calculate the numeric ymc" 
@@ -39,18 +38,31 @@ class NumericYMC:
         Target = np.where(Data['Year']>=Data['Year'].median(),1,0)
         return NumericYMC(Variable  = Variable,Target = Target,NumberOfGroups = 5,Fun = np.mean,Name = "Mean")
 
-    # Static method just for implement in the future 
+
+    # Static method for claculating ranks dictionary
     @staticmethod
-    def is_integer(Num):
-        if isinstance(Num,float):
-            return Num.is_integer()
-        elif isinstance(Num,int):
-            return True
-        else:
-            return False
+    def Ranks_Dictionary(temp_data, ranks_num):
+        quantile_seq = np.linspace(1 / ranks_num, 1, ranks_num)
+        overall_quantile = list(map(lambda x: round(np.quantile(temp_data, x), 6), quantile_seq))
+        overall_quantile = pd.concat([pd.DataFrame(quantile_seq), pd.DataFrame(overall_quantile)], axis=1)
+        overall_quantile.columns = ['quantile', 'value']
+        overall_quantile['lag_value'] = overall_quantile['value'].shift(1)
+        overall_quantile.loc[:, 'lag_value'] = overall_quantile['lag_value'].fillna(float('-inf'))
+        overall_quantile.loc[:, 'value'][len(overall_quantile['value']) - 1] = float('inf')
+        overall_quantile['Rank'] = list(range(1, len(overall_quantile['value']) + 1))
+        overall_quantile = overall_quantile.loc[overall_quantile['value']!= overall_quantile['lag_value'], :]
+        return overall_quantile
+
+    # Jitter a numeric variable
+    @staticmethod
+    def RJitter(x,factor):
+        z = max(x)-min(x)
+        amount = factor * (z/50)
+        x = x + np.random.uniform(-amount, amount, len(x))
+        return(x)
 
 
-    def YMC(self):
+    def fit(self):
         Variable = self.Variable
         Target = self.Target
         NumberOfGroups = self.NumberOfGroups
@@ -58,7 +70,7 @@ class NumericYMC:
         Name = self.Name
         
         # Create dictionary for Variable
-        Dictionary = Ranks_Dictionary(RJitter(Variable,NumericYMC.JitterRate), ranks_num=NumberOfGroups)
+        Dictionary = NumericYMC.Ranks_Dictionary(NumericYMC.RJitter(Variable,NumericYMC.JitterRate), ranks_num=NumberOfGroups)
         Dictionary.index = pd.IntervalIndex.from_arrays(Dictionary['lag_value'],
                                                         Dictionary['value'],
                                                         closed='left')
@@ -85,5 +97,19 @@ class NumericYMC:
 
     ## Read only property
     @property
-    def ReadOnlyProperty(self):
-        return "secific string to fill in the future"
+    def ClassDescription(self):
+        return "This class return numeric ymc to specific target and variable to convert"
+
+
+
+data = pd.read_csv('http://winterolympicsmedals.com/medals.csv')
+Variable = data['Year']
+Target = np.where(data['Year']>=data['Year'].mean(),1,0)
+NumberOfGroups = 10
+NumericYMC(Variable = data['Year'],Target = np.where(data['Year']>=data['Year'].mean(),1,0),NumberOfGroups = 10,Fun = np.median,Name = "Median")
+
+YMC1 = NumericYMC(Variable  = Variable,Target = Target,NumberOfGroups = 10,Fun = np.mean,Name = "Mean")
+YMC1.fit()
+
+YMC2 = NumericYMC(Variable  = Variable,Target = Target,NumberOfGroups = 10,Fun = np.median,Name = "Median")
+YMC3 = NumericYMC(Variable  = Variable,Target = Target,NumberOfGroups = 10,Fun = percentile(90),Name = "Percentile")
