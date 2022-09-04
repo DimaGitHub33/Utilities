@@ -79,16 +79,18 @@ class NumericYMC(YMC):
     #Class Attribute
     PurposeOfClass = "Split to ranks and calculate YMC for specific variable" 
 
-    def __init__(self,VariableToConvert: float, TargetVariable: float, NumberOfGroups = 10, Fun = np.mean, Name = "Mean"):
+    def __init__(self,VariableToConvert: float, TargetVariable: float, NumberOfGroups = 10, Fun = np.mean, Name = "Mean", VariableName = 'VariableName'):
         
         ##Call to super function to have acces to all attributes
         super().__init__(VariableToConvert, TargetVariable, Fun, Name)
 
         # Run validation to the recieved arguments
         assert NumberOfGroups>0, f"NumberOfGroups {NumberOfGroups} is not greater of 0"
+        assert isinstance(VariableName, str), f"VariableName {VariableName} is not a string"
 
         # Assign to self object
         self.NumberOfGroups = NumberOfGroups
+        self.VariableName = VariableName
 
     # Class method to initiate a class for examples
     @classmethod
@@ -96,14 +98,17 @@ class NumericYMC(YMC):
         Data = pd.read_csv('http://winterolympicsmedals.com/medals.csv')
         VariableToConvert = Data['Year']
         TargetVariable = np.where(Data['Year']>=Data['Year'].median(),1,0)
-        return NumericYMC(VariableToConvert = VariableToConvert,TargetVariable = TargetVariable,NumberOfGroups = 10,Fun = np.median, Name = "Median")
+        VariableName = "Year"
+        NumberOfGroups = 10
+        Name = "Median"
+        return NumericYMC(VariableToConvert = VariableToConvert,TargetVariable = TargetVariable,NumberOfGroups = NumberOfGroups,Fun = np.median, Name = Name, VariableName = VariableName)
 
     def fit(self):
         VariableToConvert = self.VariableToConvert
         TargetVariable = self.TargetVariable
         NumberOfGroups = self.NumberOfGroups
         Fun = self.Fun
-        Name = self.Name
+        Name = self.VariableName + '_' + self.Name + '_NumericYMC'
         
         # Create dictionary for Variable
         Dictionary = YMC.Ranks_Dictionary(YMC.RJitter(VariableToConvert,YMC.JitterRate), ranks_num = NumberOfGroups)
@@ -118,10 +123,10 @@ class NumericYMC(YMC):
         del IntervalLocation
 
         # Aggregation Table
-        Dictionary = Dictionary.merge(Variable.groupby('Rank')['Variable'].apply(Fun).reset_index().set_axis(['Rank', Name], axis=1), how='left', on=['Rank'])
+        Dictionary = Dictionary.merge(Variable.groupby('Rank')['Target'].apply(Fun).reset_index().set_axis(['Rank', Name], axis=1), how='left', on=['Rank'])
 
         #Fill NA with the Function outcomes on all the variable
-        Dictionary.loc[:, Name] = Dictionary[Name].fillna(Fun(Variable['Variable'].dropna()))
+        Dictionary.loc[:, Name] = Dictionary[Name].fillna(Fun(Variable['Target'].dropna()))
 
         return Dictionary
 
@@ -136,18 +141,18 @@ class FacotrYMC(YMC):
     #Class Attribute
     PurposeOfClass = "FactorYMC class" 
 
-    def __init__(self,VariableToConvert , TargetVariable, FrequencyNumber = 100, Fun = np.mean, Name = "Mean", TargetName = 'VariableName'):
+    def __init__(self,VariableToConvert , TargetVariable, FrequencyNumber = 100, Fun = np.mean, Name = "Mean", VariableName = 'VariableName'):
         
         ##Call to super function to have acces to all attributes
         super().__init__(VariableToConvert, TargetVariable, Fun, Name)
 
         # Run validation to the recieved arguments
         assert FrequencyNumber>0, f"NumberOfGroups {FrequencyNumber} is not greater of 0"
-        assert isinstance(TargetName, str), f"NTargetNameame {TargetName} is not a string"
+        assert isinstance(VariableName, str), f"NTargetNameame {VariableName} is not a string"
 
         # Assign to self object
         self.FrequencyNumber = FrequencyNumber
-        self.TargetName = TargetName
+        self.VariableName = VariableName
 
 
     # Class method to initiate a class for examples
@@ -159,16 +164,16 @@ class FacotrYMC(YMC):
         FrequencyNumber = 100
         Fun = np.median
         Name = "Mean"
-        TargetName = "Sport"
-        return FacotrYMC(VariableToConvert = VariableToConvert, TargetVariable = TargetVariable, FrequencyNumber = FrequencyNumber, Fun = Fun, Name = Name, TargetName = TargetName)
+        VariableName = "Sport"
+        return FacotrYMC(VariableToConvert = VariableToConvert, TargetVariable = TargetVariable, FrequencyNumber = FrequencyNumber, Fun = Fun, Name = Name, VariableName = VariableName)
 
     def fit(self):
-        VariableToConvert = self.VarVariableToConvertiable
+        VariableToConvert = self.VariableToConvert
         TargetVariable = self.TargetVariable
         FrequencyNumber = self.FrequencyNumber 
         Fun = self.Fun 
-        TargetName = self.TargetName
-        Suffix = TargetName + '_' + self.Name + '_YMC' 
+        VariableName = self.VariableName
+        Suffix = VariableName + '_' + self.Name + '_FactorYMC' 
         
         # Creating variable to transform it to YMC ------------------------
         Variable = pd.DataFrame({'TargetVariable':TargetVariable,
@@ -191,7 +196,7 @@ class FacotrYMC(YMC):
         Dictionary['VariableToConvert'] = np.where(Dictionary['Variable'].isin(FrequentFactors), Dictionary['Variable'], 'Not Frequent Factor')
         Dictionary = Dictionary.join(Dictionary_Variable_YMC.set_index('VariableToConvert'), how='left', on='VariableToConvert')
         Dictionary = Dictionary.drop(columns = 'VariableToConvert')
-        Dictionary.columns = [TargetName,Suffix]
+        Dictionary.columns = [VariableName,Suffix]
         Dictionary = Dictionary.sort_values(by=Suffix, ascending=False)
 
         return Dictionary
@@ -202,31 +207,33 @@ class FacotrYMC(YMC):
         return "This class return factor ymc"
     
 
-##Example of instantiating YMC class------------------------------------------------------------------------
+##Example of instantiating YMC class-------------------------------------------------------------------------------
 data = pd.read_csv('http://winterolympicsmedals.com/medals.csv')
 VariableToConvert = data['Year']
 TargetVariable = np.where(data['Year']>=data['Year'].median(),1,0)
 Fun = np.mean
 Name = "Mean"
-YMC1 =  YMC.InstantiateFromWeb()
+YMC1 = YMC.InstantiateFromWeb()
 YMC2 = YMC(VariableToConvert = VariableToConvert, TargetVariable = TargetVariable, Fun = np.median, Name='Median')
 YMC.AllInstances
 
 
 ##Example of instantiating NumericYMC class------------------------------------------------------------------------
 data = pd.read_csv('http://winterolympicsmedals.com/medals.csv')
-NumericYMC1 = NumericYMC(VariableToConvert = data['Year'],TargetVariable = np.where(data['Year']>=data['Year'].mean(),1,0),NumberOfGroups = 10,Fun = np.median,Name = "Median")
-NumericYMC2 = NumericYMC(VariableToConvert = data['Year'],TargetVariable = np.where(data['Year']>=data['Year'].mean(),1,0),NumberOfGroups = 10,Fun = np.median,Name = "np.max")
+NumericYMC1 = NumericYMC(VariableToConvert = data['Year'],TargetVariable = np.where(data['Year']>=data['Year'].mean(),1,0),NumberOfGroups = 10,Fun = np.median,Name = "Median",VariableName = 'Year')
+NumericYMC2 = NumericYMC(VariableToConvert = data['Year'],TargetVariable = np.where(data['Year']>=data['Year'].mean(),1,0),NumberOfGroups = 10,Fun = np.mean,Name = "Mean",VariableName = 'Year')
 NumericYMC3 = NumericYMC.InstantiateFromWeb()
+NumericYMC1.fit()
+NumericYMC2.fit()
 NumericYMC3.fit()
 
-##Example of nstantiating factor class------------------------------------------------------------------------
+##Example of nstantiating factor class-----------------------------------------------------------------------------
 data = pd.read_csv('http://winterolympicsmedals.com/medals.csv')
 VariableToConvert = data['Sport']
-TargetVariable = data['Year']
-FrequencyNumber = 100
-Fun = np.mean
-Name = "Mean"
-TargetName = "Sport"
-Suffix = TargetName + '_' + Name + '_YMC' 
-FacotrYMC(VariableToConvert = VariableToConvert, TargetVariable = TargetVariable, FrequencyNumber = FrequencyNumber, Fun = Fun, Name = Name)
+TargetVariable = np.where(data['Year']>=data['Year'].mean(),1,0)
+FacotrYMC1 = FacotrYMC(VariableToConvert = VariableToConvert, TargetVariable = TargetVariable, FrequencyNumber = 100, Fun = np.mean, Name = "Mean", VariableName = 'Sport')
+FacotrYMC2 = FacotrYMC(VariableToConvert = VariableToConvert, TargetVariable = TargetVariable, FrequencyNumber = 100, Fun = np.median, Name = "Median", VariableName = 'Sport')
+FacotrYMC3 = FacotrYMC(VariableToConvert = VariableToConvert, TargetVariable = TargetVariable, FrequencyNumber = 100, Fun = np.max, Name = "Max", VariableName = 'Sport')
+FacotrYMC1.fit()
+FacotrYMC2.fit()
+FacotrYMC3.fit()
