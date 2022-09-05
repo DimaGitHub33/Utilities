@@ -87,6 +87,7 @@ class NumericYMC(YMC):
         # Run validation to the recieved arguments
         assert NumberOfGroups>0, f"NumberOfGroups {NumberOfGroups} is not greater of 0"
         assert isinstance(VariableName, str), f"VariableName {VariableName} is not a string"
+        assert isinstance(Name, str), f"Name {Name} is not a string"
 
         # Assign to self object
         self.NumberOfGroups = NumberOfGroups
@@ -149,6 +150,7 @@ class FacotrYMC(YMC):
         # Run validation to the recieved arguments
         assert FrequencyNumber>0, f"NumberOfGroups {FrequencyNumber} is not greater of 0"
         assert isinstance(VariableName, str), f"NTargetNameame {VariableName} is not a string"
+        assert isinstance(Name, str), f"NTargetNameame {Name} is not a string"
 
         # Assign to self object
         self.FrequencyNumber = FrequencyNumber
@@ -160,7 +162,7 @@ class FacotrYMC(YMC):
     def InstantiateFromWeb(cls):
         Data = pd.read_csv('http://winterolympicsmedals.com/medals.csv')
         VariableToConvert = Data['Sport']
-        TargetVariable = Data['Year']
+        TargetVariable =  np.where(data['Year']>=data['Year'].median(),1,0)
         FrequencyNumber = 100
         Fun = np.median
         Name = "Mean"
@@ -207,33 +209,33 @@ class FacotrYMC(YMC):
         return "This class return factor ymc"
     
 
-##Example of instantiating YMC class-------------------------------------------------------------------------------
-data = pd.read_csv('http://winterolympicsmedals.com/medals.csv')
-VariableToConvert = data['Year']
-TargetVariable = np.where(data['Year']>=data['Year'].median(),1,0)
-Fun = np.mean
-Name = "Mean"
-YMC1 = YMC.InstantiateFromWeb()
-YMC2 = YMC(VariableToConvert = VariableToConvert, TargetVariable = TargetVariable, Fun = np.median, Name='Median')
-YMC.AllInstances
+# ## Example of instantiating YMC class-------------------------------------------------------------------------------
+# data = pd.read_csv('http://winterolympicsmedals.com/medals.csv')
+# VariableToConvert = data['Year']
+# TargetVariable = np.where(data['Year']>=data['Year'].median(),1,0)
+# Fun = np.mean
+# Name = "Mean"
+# YMC1 = YMC.InstantiateFromWeb()
+# YMC2 = YMC(VariableToConvert = VariableToConvert, TargetVariable = TargetVariable, Fun = np.median, Name='Median')
+# YMC.AllInstances
 
 
-##Example of instantiating NumericYMC class------------------------------------------------------------------------
-data = pd.read_csv('http://winterolympicsmedals.com/medals.csv')
-NumericYMC1 = NumericYMC(VariableToConvert = data['Year'],TargetVariable = np.where(data['Year']>=data['Year'].mean(),1,0),NumberOfGroups = 10,Fun = np.median,Name = "Median",VariableName = 'Year')
-NumericYMC2 = NumericYMC(VariableToConvert = data['Year'],TargetVariable = np.where(data['Year']>=data['Year'].mean(),1,0),NumberOfGroups = 10,Fun = np.mean,Name = "Mean",VariableName = 'Year')
-NumericYMC3 = NumericYMC.InstantiateFromWeb()
-NumericYMC1.fit()
-NumericYMC2.fit()
-NumericYMC3.fit()
+# ##Example of instantiating NumericYMC class------------------------------------------------------------------------
+# data = pd.read_csv('http://winterolympicsmedals.com/medals.csv')
+# NumericYMC1 = NumericYMC(VariableToConvert = data['Year'],TargetVariable = np.where(data['Year']>=data['Year'].mean(),1,0),NumberOfGroups = 10,Fun = np.median,Name = "Median",VariableName = 'Year')
+# NumericYMC2 = NumericYMC(VariableToConvert = data['Year'],TargetVariable = np.where(data['Year']>=data['Year'].mean(),1,0),NumberOfGroups = 10,Fun = np.mean,Name = "Mean",VariableName = 'Year')
+# NumericYMC3 = NumericYMC.InstantiateFromWeb()
+# NumericYMC1.fit()
+# NumericYMC2.fit()
+# NumericYMC3.fit()
 
-##Example of nstantiating factor class-----------------------------------------------------------------------------
-data = pd.read_csv('http://winterolympicsmedals.com/medals.csv')
-VariableToConvert = data['Sport']
-TargetVariable = np.where(data['Year']>=data['Year'].mean(),1,0)
-FacotrYMC1 = FacotrYMC(VariableToConvert = VariableToConvert, TargetVariable = TargetVariable, FrequencyNumber = 100, Fun = np.mean, Name = "Mean", VariableName = 'Sport')
-FacotrYMC2 = FacotrYMC(VariableToConvert = VariableToConvert, TargetVariable = TargetVariable, FrequencyNumber = 100, Fun = np.median, Name = "Median", VariableName = 'Sport')
-FacotrYMC3 = FacotrYMC(VariableToConvert = VariableToConvert, TargetVariable = TargetVariable, FrequencyNumber = 100, Fun = np.max, Name = "Max", VariableName = 'Sport')
-FacotrYMC1.fit()
-FacotrYMC2.fit()
-FacotrYMC3.fit()
+# ##Example of nstantiating factor class-----------------------------------------------------------------------------
+# data = pd.read_csv('http://winterolympicsmedals.com/medals.csv')
+# VariableToConvert = data['Sport']
+# TargetVariable = np.where(data['Year']>=data['Year'].mean(),1,0)
+# FacotrYMC1 = FacotrYMC(VariableToConvert = VariableToConvert, TargetVariable = TargetVariable, FrequencyNumber = 100, Fun = np.mean, Name = "Mean", VariableName = 'Sport')
+# FacotrYMC2 = FacotrYMC(VariableToConvert = VariableToConvert, TargetVariable = TargetVariable, FrequencyNumber = 100, Fun = np.median, Name = "Median", VariableName = 'Sport')
+# FacotrYMC3 = FacotrYMC(VariableToConvert = VariableToConvert, TargetVariable = TargetVariable, FrequencyNumber = 100, Fun = np.max, Name = "Max", VariableName = 'Sport')
+# FacotrYMC1.fit()
+# FacotrYMC2.fit()
+# FacotrYMC3.fit()
