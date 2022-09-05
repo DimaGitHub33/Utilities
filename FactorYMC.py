@@ -1,4 +1,3 @@
-##  NumericYMC -------------------------------------------------------
 import numpy as np
 import pandas as pd
 class FacotrYMC:
@@ -85,10 +84,10 @@ class FacotrYMC:
         return "This class return factor ymc to a table with traget and variable to convert"
 
 
-data = pd.read_csv('http://winterolympicsmedals.com/medals.csv')
-FactorYMC1 = FacotrYMC(VariableToConvert = 'Event gender', TargetName = 'Year',Data = data, FrequencyNumber = 100, Fun = np.median, Suffix='_Median_YMC' )
-FactorYMC1.AllInstances
-FactorYMC1.fit()
+# data = pd.read_csv('http://winterolympicsmedals.com/medals.csv')
+# FactorYMC1 = FacotrYMC(VariableToConvert = 'Event gender', TargetName = 'Year',Data = data, FrequencyNumber = 100, Fun = np.median, Suffix='_Median_YMC' )
+# FactorYMC1.AllInstances
+# FactorYMC1.fit()
 
-FactorYMC2 = FacotrYMC.InstantiateFromWeb()
-FactorYMC2.fit()
+# FactorYMC2 = FacotrYMC.InstantiateFromWeb()
+# FactorYMC2.fit()

@@ -1,4 +1,5 @@
 #%% Import Data ------------------------------------------------------------
+from statistics import quantiles
 import pandas as pd
 import numpy as np
 data = pd.read_csv('http://winterolympicsmedals.com/medals.csv')
@@ -50,23 +51,43 @@ print(FunFactorYMC(VariableToConvert = 'Sport', TargetName = 'Year',Data = data,
 print("FactorYMC - Event gender :")
 print(FunFactorYMC(VariableToConvert = 'Event gender', TargetName = 'Year',Data = data, FrequencyNumber = 100, Fun = np.median, Suffix='_Median_YMC' ))
 
+## FactorYMC - Event gender 
+print("FactorYMC - Event gender :")
+print(FunFactorYMC(VariableToConvert = 'Event gender', TargetName = 'Year',Data = data, FrequencyNumber = 100, Fun = percentile(90), Suffix='_Median_YMC' ))
+
 # %% NumericYMC Class-------------------------------------------------------------
-from NumericYMC import NumericYMC
+from YMC import NumericYMC
 data = pd.read_csv('http://winterolympicsmedals.com/medals.csv')
-Variable = data['Year']
-Target = np.where(data['Year']>=data['Year'].mean(),1,0)
-NumberOfGroups = 10
-NumericYMC(Variable = data['Year'],Target = np.where(data['Year']>=data['Year'].mean(),1,0),NumberOfGroups = 10,Fun = np.median,Name = "Median")
+NumericYMC1 = NumericYMC(VariableToConvert = data['Year'],TargetVariable = np.where(data['Year']>=data['Year'].mean(),1,0),NumberOfGroups = 10,Fun = np.mean,Name = "Mean",VariableName = 'Year')
+NumericYMC2 = NumericYMC(VariableToConvert = data['Year'],TargetVariable = np.where(data['Year']>=data['Year'].mean(),1,0),NumberOfGroups = 10,Fun = np.median,Name = "Median",VariableName = 'Year')
+NumericYMC3 = NumericYMC(VariableToConvert = data['Year'],TargetVariable = np.where(data['Year']>=data['Year'].mean(),1,0),NumberOfGroups = 10,Fun = len,Name = "Lenthg",VariableName = 'Year')
+NumericYMC4 = NumericYMC(VariableToConvert = data['Year'],TargetVariable = np.where(data['Year']>=data['Year'].mean(),1,0),NumberOfGroups = 10,Fun = percentile(90),Name = "Percentile",VariableName = 'Year')
 
-YMC1 = NumericYMC(Variable  = Variable,Target = Target,NumberOfGroups = 10,Fun = np.mean,Name = "Mean")
-YMC2 = NumericYMC(Variable  = Variable,Target = Target,NumberOfGroups = 10,Fun = np.median,Name = "Median")
-YMC3 = NumericYMC(Variable  = Variable,Target = Target,NumberOfGroups = 10,Fun = percentile(90),Name = "Percentile")
+NumericYMC1.fit()
+NumericYMC2.fit()
+NumericYMC3.fit()
+NumericYMC4.fit()
 
-#YMC3 = NumericYMC.InstantiateFromWeb()
-#print(NumericYMC.AllInstances)
+# %% FactorYMC Class-------------------------------------------------------------
+from YMC import FacotrYMC
+data = pd.read_csv('http://winterolympicsmedals.com/medals.csv')
 
-print(YMC1.YMC())
-print(YMC2.YMC())
-print(YMC3.YMC())
+## FactorYMC - Sport
+VariableToConvert = data['Sport']
+TargetVariable = data['Year']
+FacotrYMC1 = FacotrYMC(VariableToConvert = VariableToConvert, TargetVariable = TargetVariable, FrequencyNumber = 100, Fun = np.median, Name = "Median", VariableName = 'Sport')
+FacotrYMC1.fit()
+
+## FactorYMC - Event gender 
+VariableToConvert = data['Event gender']
+TargetVariable = data['Year']
+FacotrYMC2 = FacotrYMC(VariableToConvert = VariableToConvert, TargetVariable = TargetVariable, FrequencyNumber = 100, Fun = np.median, Name = "Median", VariableName = 'Sport')
+FacotrYMC2.fit()
+
+## FactorYMC - Event gender 
+VariableToConvert = data['Event gender']
+TargetVariable = data['Year']
+FacotrYMC3 = FacotrYMC(VariableToConvert = VariableToConvert, TargetVariable = TargetVariable, FrequencyNumber = 100, Fun = percentile(90), Name = "Percentile", VariableName = 'Sport')
+FacotrYMC3.fit()
 
 # %%

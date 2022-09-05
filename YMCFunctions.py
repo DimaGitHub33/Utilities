@@ -113,17 +113,17 @@ def FourBasicNumericYMC(Variable, Target, NumberOfGroups):
     # Aggregation Table
     AggregationTable = pd.DataFrame()
     AggregationTable['Rank'] = Variable['Rank'].unique()
-    AggregationTable = AggregationTable.merge(Variable.groupby('Rank')['Variable'].mean().reset_index().set_axis(['Rank', 'Mean'], axis=1), how='left', on=['Rank'])
-    AggregationTable = AggregationTable.merge(Variable.groupby('Rank')['Variable'].median().reset_index().set_axis(['Rank', 'Median'], axis=1), how='left', on=['Rank'])
-    AggregationTable = AggregationTable.merge(Variable.groupby('Rank')['Variable'].quantile(q=0.95).reset_index().set_axis(['Rank', 'Quantile'], axis=1), how='left', on=['Rank'])
-    AggregationTable = AggregationTable.merge(Variable.groupby('Rank')['Variable'].apply(lambda x: len(x)).reset_index().set_axis(['Rank', 'NumberOfObserbation'], axis=1), how='left', on=['Rank'])
+    AggregationTable = AggregationTable.merge(Variable.groupby('Rank')['Target'].mean().reset_index().set_axis(['Rank', 'Mean'], axis=1), how='left', on=['Rank'])
+    AggregationTable = AggregationTable.merge(Variable.groupby('Rank')['Target'].median().reset_index().set_axis(['Rank', 'Median'], axis=1), how='left', on=['Rank'])
+    AggregationTable = AggregationTable.merge(Variable.groupby('Rank')['Target'].quantile(q=0.95).reset_index().set_axis(['Rank', 'Quantile'], axis=1), how='left', on=['Rank'])
+    AggregationTable = AggregationTable.merge(Variable.groupby('Rank')['Target'].apply(lambda x: len(x)).reset_index().set_axis(['Rank', 'NumberOfObserbation'], axis=1), how='left', on=['Rank'])
 
     # Merge to The Dictionary
     Dictionary = Dictionary.merge(AggregationTable, how='left', on=['Rank'])
 
-    Dictionary.loc[:, 'Mean'] = Dictionary['Mean'].fillna(np.mean(Variable['Variable'].dropna()))
-    Dictionary.loc[:, 'Median'] = Dictionary['Median'].fillna(np.median(Variable['Variable'].dropna()))
-    Dictionary.loc[:, 'Quantile'] = Dictionary['Quantile'].fillna(np.quantile(Variable['Variable'].dropna(),q=0.95))
+    Dictionary.loc[:, 'Mean'] = Dictionary['Mean'].fillna(np.mean(Variable['Target'].dropna()))
+    Dictionary.loc[:, 'Median'] = Dictionary['Median'].fillna(np.median(Variable['Target'].dropna()))
+    Dictionary.loc[:, 'Quantile'] = Dictionary['Quantile'].fillna(np.quantile(Variable['Target'].dropna(),q=0.95))
     Dictionary.loc[:, 'NumberOfObserbation'] = Dictionary['NumberOfObserbation'].fillna(0)
 
     return Dictionary
@@ -150,12 +150,10 @@ def FunNumericYMC(Variable, Target, NumberOfGroups,Fun = np.mean,Name = "Mean"):
     del IntervalLocation
 
     # Aggregation Table
-    Dictionary = pd.DataFrame()
-    Dictionary['Rank'] = Variable['Rank'].unique()
-    Dictionary = Dictionary.merge(Variable.groupby('Rank')['Variable'].apply(Fun).reset_index().set_axis(['Rank', Name], axis=1), how='left', on=['Rank'])
+    Dictionary = Dictionary.merge(Variable.groupby('Rank')['Target'].apply(Fun).reset_index().set_axis(['Rank', Name], axis=1), how='left', on=['Rank'])
 
     #Fill NA with the Function outcomes on all the variable
-    Dictionary.loc[:, Name] = Dictionary[Name].fillna(Fun(Variable['Variable'].dropna()))
+    Dictionary.loc[:, Name] = Dictionary[Name].fillna(Fun(Variable['Target'].dropna()))
 
     return Dictionary
 
