@@ -117,8 +117,72 @@ Pridit
         [-0.63490772, -0.15769004, -0.54438071, ..., -0.60417859,-0.42238741,  9.05145987]
 
 """
-def Pridit(Data,FactorVariables = None, NumericVariables = None, FactorsVariablesOrder = None, NumericVariablesOrder = None):
+
+FactorVariables = [ 'GENDER', 'FAMILY_STATUS', 'ACADEMIC_DEGREE', 'PROFESSION', 'TEUR_ISUK', 'ISUK_MERAKEZ', 'TEUR_TACHBIV',
+                    'ADDRESS', 'STREET', 'CITY', 'TEUR_EZOR', 'MIKUD_BR', 'YESHUV_BR', 'TEUR_EZOR_MIKUD', 'TEUR_TAT_EZOR_MIKUD',
+                    'GEOCODE_TYPE', 'PHONES', 'CELLULARS', 'ASIRON_LAMAS', 'M_SOCHEN_MOCHER', 'SHEM_SOCHNUT_MOCHER', 'M_ERUAS']
+NumericVariables = ['TEOUDAT_ZEOUT', 'GIL', 'BR_FLG_YELED', 'CHILD_COUNT', 'ISUK', 'STATUS_ISUK', 'ZAVARON', 'TACHBIV', 'ISHUN',
+                    'SUG_VIP', 'CITY_ID', 'KOD_EZOR', 'ZIP_CODE', 'GEOCODEX', 'GEOCODEY', 'ESHKOL_PEREFIRIA', 'ESHKOL_LAMAS', 'REPORTEDSALARY',
+                    'VETEK', 'VETEK_PAIL', 'BR_FLG_POLISAT_KOLEKTIV', 'HAVE_BRIUT', 'BR_KAMUT_MUTZRIM_PEILIM', 'BR_FLG_CHOV', 'BR_SCHUM_CHOV']
+
+
+conf = {
+    'UsingFacotr': 'Both',
+    'FactorVariables' : FactorVariables,
+    'NumericVariables' : NumericVariables,
+    'FactorsVariablesOrder': None,
+    'NumericVariablesOrder': None
+}
+
+def Pridit(Data,conf = {}):
  
+    ## Fill Configuration -----------------------------------------------------
+    if (not 'FactorVariables' in conf):
+        conf['FactorVariables'] = None
+    if (not 'NumericVariables' in conf):
+        conf['NumericVariables'] = None
+    if (not 'FactorsVariablesOrder' in conf):
+        conf['FactorsVariablesOrder'] = None
+    if (not 'NumericVariablesOrder' in conf):
+        conf['NumericVariablesOrder'] = None
+
+
+    if (conf['UsingFacotr'] == 'OnlyVariables'):
+        FactorVariables = conf['FactorVariables'] 
+        NumericVariables = conf['NumericVariables']
+
+    ## Fill the FactorVariables and NumericVariables list for other columns in the input data ----
+    if (conf['UsingFacotr']=='Both'):
+            FactorVariables = conf['FactorVariables'] 
+            NumericVariables = conf['NumericVariables']
+            
+            FactorVariables2 = []
+            DataTypes = Data.dtypes.reset_index().rename(columns = {'index': 'Index',0:'Type'})
+            for Index,row in DataTypes.iterrows(): 
+                if row['Type'] in ['object','str']:
+                    FactorVariables2.append(row['Index'])
+
+            FactorVariables2 = [i for i in FactorVariables2 if i not in NumericVariables]
+            FactorVariables2 = [i for i in FactorVariables2 if i not in FactorVariables]
+            if (len(FactorVariables2)>0):
+                FactorVariables.extend(FactorVariables2)
+                    
+            NumericVariables2= []
+            DataTypes = Data.dtypes.reset_index().rename(columns = {'index': 'Index',0:'Type'})
+            for Index,row in DataTypes.iterrows(): 
+                if row['Type'] in ['int64','float64']:
+                    NumericVariables2.append(row['Index'])
+            
+            NumericVariables2 = [i for i in NumericVariables2 if i not in NumericVariables]
+            NumericVariables2 = [i for i in NumericVariables2 if i not in FactorVariables]
+            if (len(NumericVariables2)>0):
+                NumericVariables.extend(NumericVariables2)
+            
+            del(NumericVariables2)
+            del(FactorVariables2)
+
+
+
     ## Fill the FactorVariables and NumericVariables list ----------------------
     if FactorVariables is None:
         FactorVariables = []
@@ -245,12 +309,16 @@ import random as Random
 simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
 
 ## Read Data from my local memory
-Data = pd.read_parquet('/Users/dhhazanov/Downloads/ppp.parquet.gzip', engine='pyarrow')
+#Data = pd.read_parquet('/Users/dhhazanov/Downloads/ppp.parquet.gzip', engine='pyarrow')
+Data = pd.read_parquet('/Users/dhhazanov/Downloads/ppp_v1.parquet.gzip', engine='pyarrow')
+Data['HAVE_HAKIRA'] = Data['HAVE_HAKIRA'].fillna(-1)
+
 
 ## Run the pridit Score without extra argument like FactorVariables,NumericVariables,FactorsVariablesOrder,NumericVariablesOrder
 PriditScore = Pridit(Data)
+Data['PriditScore'] = PriditScore
+Data['PriditScore'].describe()
 print(PriditScore)
-
 
 
 ## Run the pridit Score without With extra argument like FactorVariables,NumericVariables,FactorsVariablesOrder,NumericVariablesOrder
@@ -262,6 +330,11 @@ FactorVariables = [ 'GENDER', 'FAMILY_STATUS', 'ACADEMIC_DEGREE', 'PROFESSION', 
 NumericVariables = ['TEOUDAT_ZEOUT', 'GIL', 'BR_FLG_YELED', 'CHILD_COUNT', 'ISUK', 'STATUS_ISUK', 'ZAVARON', 'TACHBIV', 'ISHUN', 
                     'SUG_VIP', 'CITY_ID', 'KOD_EZOR', 'ZIP_CODE', 'GEOCODEX', 'GEOCODEY', 'ESHKOL_PEREFIRIA', 'ESHKOL_LAMAS', 'REPORTEDSALARY', 
                     'VETEK', 'VETEK_PAIL', 'BR_FLG_POLISAT_KOLEKTIV', 'HAVE_BRIUT', 'BR_KAMUT_MUTZRIM_PEILIM', 'BR_FLG_CHOV', 'BR_SCHUM_CHOV']
+
+PriditScore = Pridit(Data,FactorVariables = FactorVariables, NumericVariables = NumericVariables)
+Data['PriditScore'] = PriditScore
+Data['PriditScore'].describe()
+print(PriditScore)
 
 ## Creating FactorsVariablesOrder for each factor variable it will randomized the order of the levels
 FactorsVariablesOrder = pd.DataFrame()
@@ -288,7 +361,7 @@ PriditScore = Pridit(Data,FactorVariables,NumericVariables,FactorsVariablesOrder
 ## -----------------------------------------------------------------------------
 
 ##Rank The Pridit Score
-Dictionary = Ranks_Dictionary(RJitter(Data['PriditScore'],0.00001), ranks_num=10)
+Dictionary = Ranks_Dictionary(RJitter(Data['PriditScore'],0.00001), ranks_num=100)
 Dictionary.index = pd.IntervalIndex.from_arrays(Dictionary['lag_value'],
                                                 Dictionary['value'],
                                                 closed='left')
