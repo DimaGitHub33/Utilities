@@ -118,32 +118,22 @@ Pridit
 
 """
 
-FactorVariables = [ 'GENDER', 'FAMILY_STATUS', 'ACADEMIC_DEGREE', 'PROFESSION', 'TEUR_ISUK', 'ISUK_MERAKEZ', 'TEUR_TACHBIV',
-                    'ADDRESS', 'STREET', 'CITY', 'TEUR_EZOR', 'MIKUD_BR', 'YESHUV_BR', 'TEUR_EZOR_MIKUD', 'TEUR_TAT_EZOR_MIKUD',
-                    'GEOCODE_TYPE', 'PHONES', 'CELLULARS', 'ASIRON_LAMAS', 'M_SOCHEN_MOCHER', 'SHEM_SOCHNUT_MOCHER', 'M_ERUAS']
-NumericVariables = ['TEOUDAT_ZEOUT', 'GIL', 'BR_FLG_YELED', 'CHILD_COUNT', 'ISUK', 'STATUS_ISUK', 'ZAVARON', 'TACHBIV', 'ISHUN',
-                    'SUG_VIP', 'CITY_ID', 'KOD_EZOR', 'ZIP_CODE', 'GEOCODEX', 'GEOCODEY', 'ESHKOL_PEREFIRIA', 'ESHKOL_LAMAS', 'REPORTEDSALARY',
-                    'VETEK', 'VETEK_PAIL', 'BR_FLG_POLISAT_KOLEKTIV', 'HAVE_BRIUT', 'BR_KAMUT_MUTZRIM_PEILIM', 'BR_FLG_CHOV', 'BR_SCHUM_CHOV']
-
-
-conf = {
-    'UsingFacotr': 'Both',
-    'FactorVariables' : FactorVariables,
-    'NumericVariables' : NumericVariables,
-    'FactorsVariablesOrder': None,
-    'NumericVariablesOrder': None
-}
-
 def Pridit(Data,conf = {}):
  
     ## Fill Configuration -----------------------------------------------------
+    if (not 'UsingFacotr' in conf):
+        conf['UsingFacotr'] = None
     if (not 'FactorVariables' in conf):
         conf['FactorVariables'] = None
+        FactorVariables = conf['FactorVariables'] 
     if (not 'NumericVariables' in conf):
         conf['NumericVariables'] = None
+        NumericVariables = conf['NumericVariables']
     if (not 'FactorsVariablesOrder' in conf):
         conf['FactorsVariablesOrder'] = None
     if (not 'NumericVariablesOrder' in conf):
+        conf['NumericVariablesOrder'] = None
+    if (not 'UsingFacotr' in conf):
         conf['NumericVariablesOrder'] = None
 
 
@@ -199,6 +189,10 @@ def Pridit(Data,conf = {}):
                 NumericVariables.append(row['Index'])
                
     
+    ## Fill the orders of the variables
+    FactorsVariablesOrder = conf['FactorsVariablesOrder']
+    NumericVariablesOrder = conf['NumericVariablesOrder']
+
     ## F calculation for Factor variables  ------------------------------------
     F = pd.DataFrame()
     for VariableToConvert in FactorVariables:
@@ -324,14 +318,23 @@ print(PriditScore)
 ## Run the pridit Score without With extra argument like FactorVariables,NumericVariables,FactorsVariablesOrder,NumericVariablesOrder
 
 ## FactorVariables and NumericVariables list
-FactorVariables = [ 'GENDER', 'FAMILY_STATUS', 'ACADEMIC_DEGREE', 'PROFESSION', 'TEUR_ISUK', 'ISUK_MERAKEZ', 'TEUR_TACHBIV', 
-                    'ADDRESS', 'STREET', 'CITY', 'TEUR_EZOR', 'MIKUD_BR', 'YESHUV_BR', 'TEUR_EZOR_MIKUD', 'TEUR_TAT_EZOR_MIKUD', 
+FactorVariables = [ 'GENDER', 'FAMILY_STATUS', 'ACADEMIC_DEGREE', 'PROFESSION', 'TEUR_ISUK', 'ISUK_MERAKEZ', 'TEUR_TACHBIV',
+                    'ADDRESS', 'STREET', 'CITY', 'TEUR_EZOR', 'MIKUD_BR', 'YESHUV_BR', 'TEUR_EZOR_MIKUD', 'TEUR_TAT_EZOR_MIKUD',
                     'GEOCODE_TYPE', 'PHONES', 'CELLULARS', 'ASIRON_LAMAS', 'M_SOCHEN_MOCHER', 'SHEM_SOCHNUT_MOCHER', 'M_ERUAS']
-NumericVariables = ['TEOUDAT_ZEOUT', 'GIL', 'BR_FLG_YELED', 'CHILD_COUNT', 'ISUK', 'STATUS_ISUK', 'ZAVARON', 'TACHBIV', 'ISHUN', 
-                    'SUG_VIP', 'CITY_ID', 'KOD_EZOR', 'ZIP_CODE', 'GEOCODEX', 'GEOCODEY', 'ESHKOL_PEREFIRIA', 'ESHKOL_LAMAS', 'REPORTEDSALARY', 
+NumericVariables = ['TEOUDAT_ZEOUT', 'GIL', 'BR_FLG_YELED', 'CHILD_COUNT', 'ISUK', 'STATUS_ISUK', 'ZAVARON', 'TACHBIV', 'ISHUN',
+                    'SUG_VIP', 'CITY_ID', 'KOD_EZOR', 'ZIP_CODE', 'GEOCODEX', 'GEOCODEY', 'ESHKOL_PEREFIRIA', 'ESHKOL_LAMAS', 'REPORTEDSALARY',
                     'VETEK', 'VETEK_PAIL', 'BR_FLG_POLISAT_KOLEKTIV', 'HAVE_BRIUT', 'BR_KAMUT_MUTZRIM_PEILIM', 'BR_FLG_CHOV', 'BR_SCHUM_CHOV']
 
-PriditScore = Pridit(Data,FactorVariables = FactorVariables, NumericVariables = NumericVariables)
+
+conf = {
+    'UsingFacotr': 'Both',##Both, OnlyVariables, None
+    'FactorVariables' : FactorVariables,##List, None
+    'NumericVariables' : NumericVariables,##list, None
+    'FactorsVariablesOrder': None,##List, None
+    'NumericVariablesOrder': None##List, None
+}
+
+PriditScore = Pridit(Data,conf)
 Data['PriditScore'] = PriditScore
 Data['PriditScore'].describe()
 print(PriditScore)
