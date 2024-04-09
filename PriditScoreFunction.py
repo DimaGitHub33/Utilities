@@ -117,8 +117,62 @@ Pridit
         [-0.63490772, -0.15769004, -0.54438071, ..., -0.60417859,-0.42238741,  9.05145987]
 
 """
-def Pridit(Data,FactorVariables = None, NumericVariables = None, FactorsVariablesOrder = None, NumericVariablesOrder = None):
+
+def Pridit(Data,conf = {}):
  
+    ## Fill Configuration -----------------------------------------------------
+    if (not 'UsingFacotr' in conf):
+        conf['UsingFacotr'] = None
+    if (not 'FactorVariables' in conf):
+        conf['FactorVariables'] = None
+        FactorVariables = conf['FactorVariables'] 
+    if (not 'NumericVariables' in conf):
+        conf['NumericVariables'] = None
+        NumericVariables = conf['NumericVariables']
+    if (not 'FactorsVariablesOrder' in conf):
+        conf['FactorsVariablesOrder'] = None
+    if (not 'NumericVariablesOrder' in conf):
+        conf['NumericVariablesOrder'] = None
+    if (not 'UsingFacotr' in conf):
+        conf['NumericVariablesOrder'] = None
+
+
+    if (conf['UsingFacotr'] == 'OnlyVariables'):
+        FactorVariables = conf['FactorVariables'] 
+        NumericVariables = conf['NumericVariables']
+
+    ## Fill the FactorVariables and NumericVariables list for other columns in the input data ----
+    if (conf['UsingFacotr']=='Both'):
+            FactorVariables = conf['FactorVariables'] 
+            NumericVariables = conf['NumericVariables']
+            
+            FactorVariables2 = []
+            DataTypes = Data.dtypes.reset_index().rename(columns = {'index': 'Index',0:'Type'})
+            for Index,row in DataTypes.iterrows(): 
+                if row['Type'] in ['object','str']:
+                    FactorVariables2.append(row['Index'])
+
+            FactorVariables2 = [i for i in FactorVariables2 if i not in NumericVariables]
+            FactorVariables2 = [i for i in FactorVariables2 if i not in FactorVariables]
+            if (len(FactorVariables2)>0):
+                FactorVariables.extend(FactorVariables2)
+                    
+            NumericVariables2= []
+            DataTypes = Data.dtypes.reset_index().rename(columns = {'index': 'Index',0:'Type'})
+            for Index,row in DataTypes.iterrows(): 
+                if row['Type'] in ['int64','float64']:
+                    NumericVariables2.append(row['Index'])
+            
+            NumericVariables2 = [i for i in NumericVariables2 if i not in NumericVariables]
+            NumericVariables2 = [i for i in NumericVariables2 if i not in FactorVariables]
+            if (len(NumericVariables2)>0):
+                NumericVariables.extend(NumericVariables2)
+            
+            del(NumericVariables2)
+            del(FactorVariables2)
+
+
+
     ## Fill the FactorVariables and NumericVariables list ----------------------
     if FactorVariables is None:
         FactorVariables = []
@@ -135,6 +189,10 @@ def Pridit(Data,FactorVariables = None, NumericVariables = None, FactorsVariable
                 NumericVariables.append(row['Index'])
                
     
+    ## Fill the orders of the variables
+    FactorsVariablesOrder = conf['FactorsVariablesOrder']
+    NumericVariablesOrder = conf['NumericVariablesOrder']
+
     ## F calculation for Factor variables  ------------------------------------
     F = pd.DataFrame()
     for VariableToConvert in FactorVariables:

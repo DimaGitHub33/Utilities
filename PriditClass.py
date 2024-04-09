@@ -362,8 +362,8 @@ simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
 
 ## Read Data from my local memory
 # Data = pd.read_parquet('/Users/dhhazanov/Downloads/ppp.parquet.gzip', engine='pyarrow')
-# Data = pd.read_parquet('/Users/dhhazanov/Downloads/ppp_v1.parquet.gzip', engine='pyarrow')
-Data = pd.read_parquet(r'C:\github\Utilities\machine_learning_examples\ppp_v1.parquet.gzip', engine='pyarrow')
+Data = pd.read_parquet('/Users/dhhazanov/Downloads/ppp_v1.parquet.gzip', engine='pyarrow')
+#Data = pd.read_parquet(r'C:\github\Utilities\machine_learning_examples\ppp_v1.parquet.gzip', engine='pyarrow')
 Data['HAVE_HAKIRA'] = Data['HAVE_HAKIRA'].fillna(-1)
 
 ## Run the pridit Score without extra argument like FactorVariables,NumericVariables,FactorsVariablesOrder,NumericVariablesOrder
@@ -376,11 +376,11 @@ NumericVariables = ['TEOUDAT_ZEOUT', 'GIL', 'BR_FLG_YELED', 'CHILD_COUNT', 'ISUK
                     'VETEK', 'VETEK_PAIL', 'BR_FLG_POLISAT_KOLEKTIV', 'HAVE_BRIUT', 'BR_KAMUT_MUTZRIM_PEILIM', 'BR_FLG_CHOV', 'BR_SCHUM_CHOV']
 
 conf = {
-    'UsingFacotr': 'Both',  ##Both, OnlyVariables, None
+    'UsingFacotr': 'OnlyVariables',  ##Both, OnlyVariables, None
     'FactorVariables': FactorVariables,  ##List, None
     'NumericVariables': NumericVariables,  ##list, None
-    # 'FactorVariables': [],  ##List, None
-    # 'NumericVariables': [],  ##list, None
+    #'FactorVariables': [],  ##List, None
+    #'NumericVariables': [],  ##list, None
     'FactorsVariablesOrder': None,  ##List, None
     'NumericVariablesOrder': None  ##List, None
 }
